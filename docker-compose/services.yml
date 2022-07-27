@@ -32,6 +32,18 @@ services:
       - "9090:9090"
     networks:
       - backend
+#  userservice2:
+#    image: ${GROUP_ID}/user-service:${SERVICE_VERSION:-latest}
+#    environment:
+#      - "PROFILE=dev"
+#      - "JAVA_OPTS:-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5007 -Xms128m -Xmx256m"
+#    depends_on:
+#      database:
+#        condition: service_healthy
+#    ports:
+#      - "9093:9090"
+#    networks:
+#      - backend
   projectservice:
     image: ${GROUP_ID}/project-service:${SERVICE_VERSION:-latest}
     environment:
@@ -54,6 +66,31 @@ services:
         condition: service_healthy
     ports:
       - "9092:9092"
+    networks:
+      - backend
+  discovery-service:
+    image: ${GROUP_ID}/discovery-service:${SERVICE_VERSION:-latest}
+    ports:
+      - "8761:8761"
+    networks:
+      - backend
+  gateway-service:
+    image: ${GROUP_ID}/gateway-service:${SERVICE_VERSION:-latest}
+    ports:
+      - "8762:8762"
+    depends_on:
+      - discovery-service
+      - userservice
+      - userservice2
+      - projectservice
+      - taskservice
+    networks:
+      - backend
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    ports:
+      - "9411:9411"
     networks:
       - backend
 networks:
