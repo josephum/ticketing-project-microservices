@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: config-server
+  profiles:
+    active: git
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/josephum/ticketing-project-microservice-config.git
+          default-label: main
+          username: josephum
+          password: '{cipher}40755e6972a4738eaf5e8c9ab8834225daf817aaf4f2be9654ef4585d3052d26077233a2f3a99f314bbddecbb48e6542702363e87cd4ded0db66cf978c1fa660'
+      fail-fast: true
+encrypt:
+  key: cydeo

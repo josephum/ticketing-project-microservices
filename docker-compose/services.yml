@@ -20,18 +20,18 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-  userservice:
-    image: ${GROUP_ID}/user-service:${SERVICE_VERSION:-latest}
-    environment:
-      - "PROFILE=dev"
-      - "JAVA_OPTS:-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5007 -Xms128m -Xmx256m"
-    depends_on:
-      database:
-        condition: service_healthy
-    ports:
-      - "9093:9090"
-    networks:
-      - backend
+#  userservice:
+#    image: ${GROUP_ID}/user-service:${SERVICE_VERSION:-latest}
+#    environment:
+#      - "PROFILE=dev"
+#      - "JAVA_OPTS:-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5007 -Xms128m -Xmx256m"
+#    depends_on:
+#      database:
+#        condition: service_healthy
+#    ports:
+#      - "9093:9090"
+#    networks:
+#      - backend
 #  userservice2:
 #    image: ${GROUP_ID}/user-service:${SERVICE_VERSION:-latest}
 #    environment:
@@ -44,18 +44,18 @@ services:
 #      - "9093:9090"
 #    networks:
 #      - backend
-  projectservice:
-    image: ${GROUP_ID}/project-service:${SERVICE_VERSION:-latest}
-    environment:
-      - "PROFILE=dev"
-      - "JAVA_OPTS:-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5007 -Xms128m -Xmx256m"
-    depends_on:
-      database:
-        condition: service_healthy
-    ports:
-      - "9091:9091"
-    networks:
-      - backend
+#  projectservice:
+#    image: ${GROUP_ID}/project-service:${SERVICE_VERSION:-latest}
+#    environment:
+#      - "PROFILE=dev"
+#      - "JAVA_OPTS:-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5007 -Xms128m -Xmx256m"
+#    depends_on:
+#      database:
+#        condition: service_healthy
+#    ports:
+#      - "9091:9091"
+#    networks:
+#      - backend
   taskservice:
     image: ${GROUP_ID}/task-service:${SERVICE_VERSION:-latest}
     environment:
@@ -112,6 +112,46 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=abc1
     depends_on:
       - prometheus
+    networks:
+      - backend
+  configserver:
+    image: ${GROUP_ID}/config-server:${SERVICE_VERSION:-latest}
+    ports:
+      - "8888:8888"
+    networks:
+      backend:
+        aliases:
+          - "configserver"
+  userservice:
+    image: ${GROUP_ID}/user-service:${SERVICE_VERSION:-latest}
+    environment:
+      - "PROFILE=dev"
+      - "CONFIGSERVER_URI=http://configserver:8888"
+      - "CONFIGSERVER_PORT=8888"
+      - "JAVA_OPTS:-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5007 -Xms128m -Xmx1g"
+    depends_on:
+      database:
+        condition: service_healthy
+      configserver:
+        condition: service_started
+    ports:
+      - "9093:9093"
+    networks:
+      - backend
+  projectservice:
+    image: ${GROUP_ID}/project-service:${SERVICE_VERSION:-latest}
+    environment:
+      - "PROFILE=dev"
+      - "CONFIGSERVER_URI=http://configserver:8888"
+      - "CONFIGSERVER_PORT=8888"
+      - "JAVA_OPTS:-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5007 -Xms128m -Xmx1g"
+    depends_on:
+      database:
+        condition: service_healthy
+      configserver:
+        condition: service_started
+    ports:
+      - "9091:9091"
     networks:
       - backend
 networks:
